@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+<script
+	src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<title>Repository View</title>
+<style>
+.table.dataTable {
+  margin: 0 auto;
+  width: 100%;
+  clear: both;
+  border-collapse: collapse;
+  table-layout: fixed;
+  word-wrap: break-word; 
+  font-family: monospace;
+}
+.table.dataTable thead tr {
+  background-color: rgb(23, 162, 184);
+  color:white;
+  font-size:14px;
+  border-bottom: 18px solid #dddddd;
+}
+ 
+.table.dataTable tbody tr td{
+	font-size:14px;
+}
+ 
+.table.dataTable tbody tr:nth-child(even):hover td{
+	color:white;
+    background-color: rgb(23, 162, 184);
+    
+}
+
+.table.dataTable tbody tr:nth-child(odd):hover td {
+	color:white;
+    background-color: rgb(23, 162, 184);
+
+}
+
+.table.dataTable.row-border tbody th, 
+.table.dataTable.row-border tbody td {
+  border-top: 8px solid #dddddd;
+}
+
+
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  color: white !important;
+  border: 1px solid grey;
+  background-color: #585858;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #17a2b8), color-stop(100%, #17a2b8));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #17a2b8 0%, #17a2b8 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -moz-linear-gradient(top, #17a2b8 0%, #17a2b8 100%);
+  /* FF3.6+ */
+  background: -ms-linear-gradient(top, #17a2b8 0%, #17a2b8 100%);
+  /* IE10+ */
+  background: -o-linear-gradient(top, #17a2b8 0%, #17a2b8 100%);
+  /* Opera 11.10+ */
+  background: linear-gradient(to bottom, #17a2b8 0%, #17a2b8 100%);
+  /* W3C */
+}
+
+
+.spinner {
+	left: 45%;
+	height: 50px;
+	width: 50px;
+	margin: 0px auto;
+	-webkit-animation: rotation 1s infinite linear;
+	-moz-animation: rotation 1s infinite linear;
+	-o-animation: rotation 1s infinite linear;
+	animation: rotation 1s infinite linear;
+	border-left: 10px solid rgba(23, 162, 184, .15);
+	border-right: 10px solid rgba(23, 162, 184, .15);
+	border-bottom: 10px solid rgba(23, 162, 184, .15);
+	border-top: 10px solid rgba(23, 162, 184, .8);
+	border-radius: 100%;
+}
+
+@-webkit-keyframes rotation {
+	from {-webkit-transform: rotate(0deg);
+}
+
+to {
+	-webkit-transform: rotate(359deg);
+}
+
+}
+@-moz-keyframes rotation {
+	from {-moz-transform: rotate(0deg);
+}
+
+to {
+	-moz-transform: rotate(359deg);
+}
+
+}
+@-o-keyframes rotation {
+	from {-o-transform: rotate(0deg);
+}
+
+to {
+	-o-transform: rotate(359deg);
+}
+
+}
+@keyframes rotation {
+	from {transform: rotate(0deg);
+}
+
+to {
+	transform: rotate(359deg);
+}
+</style>
+<script>
+	$(document).ready(function() {
+		
+		$('#dataTable').DataTable({
+			 "autoWidth": false,
+			 "columnDefs": [
+			             { "targets": 0,"visible": false },
+			             {"width": "10%","targets": 1},
+			             {"width": "10%","targets": 2},
+			             {"width": "10%","targets": 3},
+			             {"width": "35%","targets": 4},
+			             {"width": "15%","targets": 5},
+			             {"width": "10%","targets": 6,'sType': 'date'}
+			           ]
+		});
+
+		reloadTable();
+		
+		
+		
+	});
+	
+	function createTableEntry(annotationData){
+		var table = $('#dataTable').dataTable()
+		table.fnAddData([
+			annotationData.objectID,
+			annotationData.author,
+			annotationData.projectId,
+			annotationData.csn,
+			annotationData.annotationText,
+			annotationData.tags,
+			annotationData.creationDate
+		                 ])
+		
+	}
+	
+	function reloadTable(){
+		$('#refresh').prop("disabled",true)
+		var table = $('#dataTable').dataTable()
+		table.fnClearTable()
+		$('#spinner').show()
+	 	$.getJSON('https://ery1pcejri.execute-api.eu-central-1.amazonaws.com/Prototype/annotation', function (data) {
+	 		$('#spinner').hide()
+	 		$.each(data,function(index,annotationEntry){
+	 			createTableEntry(annotationEntry);
+	 			
+	 		})
+	 	
+			$('#refresh').prop("disabled",false)
+		});	
+	}
+	
+	
+</script>
+</head>
+<body>
+	<div class="container">
+			<div class="jumbotron vertical-center">
+				<div
+							class="p-2 mb-2 bg-info text-white rounded font-weight-bold shadow"
+							style="text-align: center">Annotation Documents</div>
+				<br style="clear: both">
+				<div id="spinner" class="spinner" style="display: none;"></div>
+				<table id="dataTable"
+					class=" table table-bordered row-border "
+					style="width: 100%">
+					<thead>
+						<tr >
+							<th>ID</th>
+							<th>Author</th>
+							<th>Project</th>
+							<th>CSN</th>
+							<th>Annotation</th>
+							<th>Tags</th>
+							<th>Date</th>
+						</tr>
+					</thead>
+
+					<tbody id="dataTableBody">
+					</tbody>
+				</table>
+				<br style="clear: both">
+				<button type="button" id="refresh" name="submit"
+								class="btn btn-info font-weight-bold shadow" style="width: 12%"
+								onclick="reloadTable()">Refresh</button>
+								
+			</div>
+		</div>
+</body>
+</html>
